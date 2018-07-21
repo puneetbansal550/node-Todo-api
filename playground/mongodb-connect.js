@@ -17,8 +17,8 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp',(err, db) =>{
   });
 
 db.collection('Users').insertOne({
-  name: 'Puneet',
-  age: 21,
+  name: 'Kim',
+  age: 25,
   location: 'Delhi, India'
 },(err,result) =>{
   if (err) {
