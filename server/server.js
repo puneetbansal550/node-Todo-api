@@ -15,10 +15,12 @@ app.post('/todos', (req, res) => {
   newTodo.save().then((doc) =>{
     res.send(doc);
   },(e)=> {
-    res.status(400).send('Unable to add todo', e);
+    res.status(400).send('Unable to add todo');
   });
 });
 
 app.listen(3000,() => {
   console.log('Server is up at 3000');
 });
+
+module.exports = {app};
