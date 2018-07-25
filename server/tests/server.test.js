@@ -3,15 +3,18 @@
 
 const expect = require('expect');
 const request = require('supertest');
+var {ObjectID} = require('mongodb');
 
 var {app} = require('./../server');
 var {Todo} = require('./../models/Todo');
 
 var todoArray = [
   {
+    _id: new ObjectID(),
     text: 'First todo text'
   },
   {
+    _id: new ObjectID(),
     text: 'Secondtodo text'
   }
 ];
@@ -81,4 +84,31 @@ describe('GET /todos', () =>{
       })
       .end(done);
   });
+});
+
+describe('GET /todo/:id',()=> {
+  it('should find todo from params id',(done) =>{
+    request(app)
+      .get(`/todos/${todoArray[0]._id}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(todoArray[0].text);
+      })
+      .end(done);
+  });
+
+  it('should send a 404 for invalid params id',(done) =>{
+    request(app)
+      .get(`/todos/123`)
+      .expect(404)
+      .end(done);
+  })
+
+  it('should send a 404 for NOT exist params id',(done) =>{
+    var hexID = new ObjectID().toHexString();
+    request(app)
+      .get(`/todos/${hexID}`)
+      .expect(404)
+      .end(done);
+  })
 });
