@@ -151,6 +151,4 @@ describe('DELETE /todo/:id',() =>{
       .expect(404)
       .end(done);
   });
-
-
 });
