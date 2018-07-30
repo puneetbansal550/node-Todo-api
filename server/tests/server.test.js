@@ -97,18 +97,60 @@ describe('GET /todo/:id',()=> {
       .end(done);
   });
 
-  it('should send a 404 for invalid params id',(done) =>{
-    request(app)
-      .get(`/todos/123`)
-      .expect(404)
-      .end(done);
-  })
-
-  it('should send a 404 for NOT exist params id',(done) =>{
+  it('should send a 404 if id is invalid',(done) =>{
     var hexID = new ObjectID().toHexString();
     request(app)
       .get(`/todos/${hexID}`)
       .expect(404)
       .end(done);
   })
+
+  it('should send a 404 if id not exist',(done) =>{
+    request(app)
+      .get(`/todos/123`)
+      .expect(404)
+      .end(done);
+  })
+});
+
+describe('DELETE /todo/:id',() =>{
+
+  it('should delete a todo',(done) =>{
+    var id = todoArray[1]._id.toHexString();
+    request(app)
+      .delete(`/todos/${id}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo._id).toBe(id);
+      })
+      .end((err, res) =>{
+        if (err) {
+          return done(err);
+        }
+
+        Todo.findById(id).then((todo) =>{
+          expect(todo).toNotExist();
+          done();
+        }).catch((e) =>{
+          return done(e);
+        });
+      });
+  });
+
+  it('should return 404 if todo not found',(done) =>{
+        request(app)
+          .get(`/todos/123`)
+          .expect(404)
+          .end(done);
+  });
+
+  it('should return 404 if id is invalid', (done) =>{
+    var hexID = new ObjectID().toHexString();
+    request(app)
+      .get(`/todos/${hexID}`)
+      .expect(404)
+      .end(done);
+  });
+
+
 });
