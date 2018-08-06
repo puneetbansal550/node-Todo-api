@@ -10,7 +10,7 @@ var {User} = require('./models/User');
 
 var app = express();
 var port = process.env.PORT;
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
   var newTodo = new Todo({
@@ -46,7 +46,6 @@ app.get('/todos/:id',(req, res) =>{
     return res.status(400).send('Not found');
   })
 });
-
 app.delete('/todos/:id', (req,res) => {
   var id = req.params.id;
   if(!ObjectID.isValid(id)){
@@ -86,6 +85,20 @@ app.patch('/todos/:id',(req, res) => {
   })
 
 });
+
+app.post('/users',(req, res) => {
+    var body = _.pick(req.body,['email','password']);
+    var newUser = new User(body);
+
+    newUser.save().then(() => {
+      return newUser.generateAuthToken();
+    }).then((token) =>{
+      res.header('x-auth', token).send(newUser);
+    }).catch((e) => {
+      return res.status(404).send(`${e}`);
+    });
+});
+
 
 app.listen(port,() => {
   console.log(`Server is up at port ${port}`);
