@@ -2,11 +2,12 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 // email - string required customValidation(validate{validator,message}) unique
 // password - string required minlength hash(Bcrypt oneWay Algorithm)
 // tokens - arrayOfObjects--access(auth(authentication type) --token)
 
-
+// mongoose middleware - pre
 var userSchema = mongoose.Schema({
   email:{
     required: true,
@@ -51,7 +52,35 @@ userSchema.methods.generateAuthToken = function () {
   return user.save().then(() => {
     return token;
   });
-}
+};
+userSchema.statics.findByToken = function(token) {
+  var user = this;
+  var tokenResult;
+  try {
+    tokenResult = jwt.verify(token, 'somesecert');
+  } catch (e) {
+    return Promise.reject();
+  }
+  return User.find({
+    _id : tokenResult._id,
+    'tokens.access' : tokenResult.access,
+    'tokens.token': token
+  });
+};
+userSchema.pre('save',function (next) {
+  var user = this;
+  if(user.isModified('password')){
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(user.password, salt, (err, hashPassword) => {
+        user.password = hashPassword;
+        next();
+      });
+    });
+  }
+  else {
+    next();
+  }
+});
 
 
 var User = mongoose.model('User',userSchema);

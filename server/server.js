@@ -7,10 +7,10 @@ const {ObjectID} = require('mongodb');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/Todo');
 var {User} = require('./models/User');
-
+var {authentication} = require('./middleware/authentication');
 var app = express();
 var port = process.env.PORT;
-// app.use(bodyParser.json());
+ app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
   var newTodo = new Todo({
@@ -99,7 +99,11 @@ app.post('/users',(req, res) => {
     });
 });
 
+app.get('/users/me',authentication, (req, res) => {
+  var user = req.user;
+  res.send(user);
 
+});
 app.listen(port,() => {
   console.log(`Server is up at port ${port}`);
 });
