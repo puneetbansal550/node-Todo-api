@@ -56,6 +56,7 @@ userSchema.methods.generateAuthToken = function () {
 userSchema.statics.findByToken = function(token) {
   var user = this;
   var tokenResult;
+
   try {
     tokenResult = jwt.verify(token, 'somesecert');
   } catch (e) {
@@ -64,7 +65,7 @@ userSchema.statics.findByToken = function(token) {
   return User.find({
     _id : tokenResult._id,
     'tokens.access' : tokenResult.access,
-    'tokens.token': token
+    'tokens.token': token.toString()
   });
 };
 userSchema.pre('save',function (next) {

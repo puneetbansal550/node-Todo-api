@@ -7,25 +7,11 @@ var {ObjectID} = require('mongodb');
 
 var {app} = require('./../server');
 var {Todo} = require('./../models/Todo');
+var {todoArray, populateTodo, userArray, populateUser} = require('./seeds/seeds');
 
-var todoArray = [
-  {
-    _id: new ObjectID(),
-    text: 'First todo text',
-  },
-  {
-    _id: new ObjectID(),
-    text: 'Secondtodo text',
-    completed : true,
-    completedAt : 222
-  }
-];
 
-beforeEach((done) =>{
-  Todo.remove({}).then(() => {
-    Todo.insertMany(todoArray);
-  }).then(() => done());
-});
+beforeEach(populateTodo);
+beforeEach(populateUser);
 
 describe('POST /todos',()=>{
     it('should create todo in mongo',(done) =>{
@@ -75,7 +61,6 @@ describe('POST /todos',()=>{
 
 
 });
-
 describe('GET /todos', () =>{
   it('should get all todo',(done) =>{
     request(app)
@@ -87,7 +72,6 @@ describe('GET /todos', () =>{
       .end(done);
   });
 });
-
 describe('GET /todo/:id',()=> {
   it('should find todo from params id',(done) =>{
     request(app)
@@ -154,7 +138,6 @@ describe('DELETE /todo/:id',() =>{
       .end(done);
   });
 });
-
 describe('PATCH /todos/:id', () => {
 
   it('should update text property and add completedAt',(done) =>{
@@ -186,11 +169,56 @@ describe('PATCH /todos/:id', () => {
       .send({completed})
       .expect((res) => {
         expect(res.body.todo.completedAt).toNotExist();
-        console.log(res.body.todo.completed);
+        // console.log(res.body.todo.completed);
       })
       .end(done);
   });
 
 
 
+});
+describe('POST /users',() =>{
+
+  it('should create a user', (done) => {
+    var user = {email: 'puneet@bansal.com', password: '123456'};
+    request(app)
+      .post('/users')
+      .send(user)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body._id).toExist();
+        expect(res.body.email).toBe(user.email);
+        expect(res.header['x-auth']).toExist();
+      })
+      .end(done);
+  });
+  it('should not create user',(done) => {
+    request(app)
+      .post('/users')
+      .send(userArray[1])
+      .expect(404)
+      .end(done);
+  });
+});
+
+describe('GET /users/me',() => {
+  it('should return individual user data by header token', (done) => {
+    request(app)
+      .get('/users/me')
+      .set('x-auth',userArray[0].tokens[0].token)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body[0].email).toBe(userArray[0].email);
+        expect(res.body[0]._id).toBe(userArray[0]._id.toHexString());
+        expect(res.body[0].password).toNotExist();
+        expect(res.body[0].tokens).toNotExist();
+      })
+      .end(done);
+  });
+  it('should return 401 without token', (done) => {
+    request(app)
+      .get('/users/me')
+      .expect(401)
+      .end(done);
+  });
 });
