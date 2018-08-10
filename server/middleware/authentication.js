@@ -6,7 +6,7 @@ var authentication = (req, res, next) => {
     if (!user) {
         throw new Error();
     }
-    req.user = user;
+    req.user = user[0];
     next();
   }).catch((e) => {
     res.status(401).send();

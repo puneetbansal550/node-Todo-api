@@ -9,17 +9,20 @@ const bcrypt = require('bcryptjs');
 var data = {
   id: 10
 }
-bcrypt.genSalt(10, (err, salt) => {
-  bcrypt.hash('12345', salt, (err, hashedPassword) =>{
-    console.log(`salt: ${salt}`);
-    console.log(`hashedPassword: ${hashedPassword}`);
-    bcrypt.compare('12345', hashedPassword, (err, res) =>{
-      console.log(res);
-    });
-
-  });
+// bcrypt.genSalt(10, (err, salt) => {
+//   bcrypt.hash('12345', salt, (err, hashedPassword) =>{
+//     console.log(`salt: ${salt}`);
+//     console.log(`hashedPassword: ${hashedPassword}`);
+//     bcrypt.compare('12345', hashedPassword, (err, res) =>{
+//       console.log(res);
+//     });
+//
+//   });
+// });
+bcrypt.compare('123456','$2a$10$A.Y6jeb81SpgDSL9lBWYFeDWCZqUugJ73stgWfTVADgHNtMKWwvbi',(err,res) => {
+  console.log(err);
+  console.log(res);
 });
-
 
 
 
