@@ -7,6 +7,7 @@ var {ObjectID} = require('mongodb');
 
 var {app} = require('./../server');
 var {Todo} = require('./../models/Todo');
+var {User} = require('./../models/User');
 var {todoArray, populateTodo, userArray, populateUser} = require('./seeds/seeds');
 
 
@@ -98,7 +99,6 @@ describe('GET /todo/:id',()=> {
       .end(done);
   })
 });
-
 describe('DELETE /todo/:id',() =>{
 
   it('should delete a todo',(done) =>{
@@ -177,6 +177,7 @@ describe('PATCH /todos/:id', () => {
 
 
 });
+
 describe('POST /users',() =>{
 
   it('should create a user', (done) => {
@@ -200,7 +201,6 @@ describe('POST /users',() =>{
       .end(done);
   });
 });
-
 describe('GET /users/me',() => {
   it('should return individual user data by header token', (done) => {
     request(app)
@@ -208,10 +208,10 @@ describe('GET /users/me',() => {
       .set('x-auth',userArray[0].tokens[0].token)
       .expect(200)
       .expect((res) => {
-        expect(res.body[0].email).toBe(userArray[0].email);
-        expect(res.body[0]._id).toBe(userArray[0]._id.toHexString());
-        expect(res.body[0].password).toNotExist();
-        expect(res.body[0].tokens).toNotExist();
+        expect(res.body.email).toBe(userArray[0].email);
+        expect(res.body._id).toBe(userArray[0]._id.toHexString());
+        expect(res.body.password).toNotExist();
+        expect(res.body.tokens).toNotExist();
       })
       .end(done);
   });
@@ -222,3 +222,44 @@ describe('GET /users/me',() => {
       .end(done);
   });
 });
+describe('POST /users/login',() => {
+  it('should login user and return auth token',(done) => {
+    var body = {
+      email: userArray[0].email,
+      password: userArray[0].password
+    }
+    request(app)
+      .post('/users/login')
+      .send(body)
+      .expect(200)
+      .expect((res) => {
+        expect(res.header['x-auth']).toExist();
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        User.findById(userArray[0]._id).then((user) => {
+          expect(user.tokens[1]).toInclude({
+            access: 'auth',
+            token : res.headers['x-auth']
+          });
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+  it('should reject invalid login',(done) => {
+    var body = {
+      email: userArray[0].email,
+      password: 'hello'
+    }
+    request(app)
+      .post('/users/login')
+      .send(body)
+      .expect(400)
+      .expect((res) => {
+        expect(res.header['x-auth']).toNotExist();
+      })
+      .end(done)
+  });
+  });
