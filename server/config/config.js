@@ -7,8 +7,5 @@ if(env === 'test' || env === 'develpoment'){
   });
 }
 else{
-  envConfig = 'production';
-  Object.keys(envConfig).forEach((key) => {
-  process.env.envConfig[key] = envConfig[key];
-});
+  process.env.MONGODB_URI = "mongodb://puneet:puneet123@ds253821.mlab.com:53821/todoapp_puneet";
 }
