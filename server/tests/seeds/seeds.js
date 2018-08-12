@@ -3,18 +3,6 @@ const jwt = require('jsonwebtoken');
 var {Todo} = require('./../../models/Todo');
 var {User} = require('./../../models/User');
 
-var todoArray = [
-  {
-    _id: new ObjectID(),
-    text: 'First todo text',
-  },
-  {
-    _id: new ObjectID(),
-    text: 'Secondtodo text',
-    completed : true,
-    completedAt : 222
-  }
-];
 var userOneId = new ObjectID();
 var userTwoId = new ObjectID();
 var userArray = [{
@@ -28,9 +16,26 @@ var userArray = [{
 },{
   _id : userTwoId,
   email: 'user2@example.com',
-  password: 'abc123'
+  password: 'abc123',
+  tokens: [{
+    access: 'auth',
+    token: jwt.sign({_id: userTwoId, access: 'auth'}, 'somesecert').toString()
+  }]
 }]
-
+var todoArray = [
+  {
+    _id: new ObjectID(),
+    text: 'First todo text',
+    _creator: userOneId
+  },
+  {
+    _id: new ObjectID(),
+    text: 'Secondtodo text',
+    completed : true,
+    completedAt : 222,
+    _creator: userTwoId
+  }
+];
 var populateUser = (done) =>{
   User.remove({}).then(() => {
     // XXXXXXXX      wrong   User.insertMany(userArray);
