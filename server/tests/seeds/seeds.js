@@ -11,7 +11,7 @@ var userArray = [{
   password : '123456',
   tokens: [{
     access: 'auth',
-    token: jwt.sign({_id: userOneId, access: 'auth'}, 'somesecert').toString()
+    token: jwt.sign({_id: userOneId, access: 'auth'},process.env.JWT_SECERT).toString()
   }]
 },{
   _id : userTwoId,
@@ -19,7 +19,7 @@ var userArray = [{
   password: 'abc123',
   tokens: [{
     access: 'auth',
-    token: jwt.sign({_id: userTwoId, access: 'auth'}, 'somesecert').toString()
+    token: jwt.sign({_id: userTwoId, access: 'auth'}, process.env.JWT_SECERT).toString()
   }]
 }]
 var todoArray = [
